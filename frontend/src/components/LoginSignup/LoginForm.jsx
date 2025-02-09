@@ -22,7 +22,6 @@ export default function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // console.log("Login form submitted:", formData);
       const response = await axios.post(urls.login, formData);
       localStorage.setItem("token", response.data.token,{expires: 1});
       localStorage.setItem("user", JSON.stringify(response.data.user));
