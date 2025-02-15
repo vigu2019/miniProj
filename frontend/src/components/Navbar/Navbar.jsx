@@ -26,18 +26,37 @@
     const [passwordDetails, setPasswordDetails] = useState({
         oldPassword: "",
         newPassword: "",
+    }) 
+    const [userDetails, setUserDetails] = useState({
+        email: authUser.email,
     })
-
     const handleEdit = (e) => {
         e.preventDefault()
         setIsEditing(true)
         setIsChangingPassword(false)
     }
 
-    const handleSave = () => {
-        setIsEditing(false)
-        // Here you would typically send the updated user details to your backend
-        console.log("Saving user details:", userDetails)
+    const handleSave = async (e) => {
+        e.preventDefault()
+        if(authUser.email === userDetails.email){
+            setIsEditing(false)
+            toast.warning("No changes made")
+            return
+        }
+        try {
+            const token = localStorage.getItem("token")
+            const response = await axios.put(urls.updateProfile, userDetails, {
+                headers: {
+                    "auth-token": token,
+                },
+            })
+            toast.success(response.data.message)
+            setIsEditing(false)
+            setAuthUser({...authUser,email:userDetails.email})
+        } catch (error) {
+            toast.error(error.response?.data?.error || error.message)
+            console.log(error)
+        }
     }
 
     const handleChange = (e) => {
@@ -55,10 +74,27 @@
     };
 
 
-    const handleChangePasswordSubmit = () => {
-        console.log("Changing password:", passwordDetails)
-        setIsChangingPassword(false)
-        setPasswordDetails({ oldPassword: "", newPassword: "" })
+    const handleChangePasswordSubmit = async (e)  =>{
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.put(urls.updatePassword, passwordDetails, {
+                headers: {
+                    "auth-token": token
+                }
+            }
+            )
+            toast.success(response.data.message);
+            setPasswordDetails({
+                oldPassword: "",
+                newPassword: ""
+            });
+            setIsChangingPassword(false);
+        }
+        catch (error) {
+            toast.error(error.response?.data?.error || error.message);
+            console.log(error);
+        }
     }
     const handleLogout = async (e) => {
         e.preventDefault();
@@ -104,8 +140,7 @@
                         id="username"
                         name="username"
                         value={authUser.username}
-                        onChange={handleChange}
-                        disabled={!isEditing}
+                        disabled={true}
                         />
                     </div>
                     <div>
@@ -114,11 +149,9 @@
                         id="fullName"
                         name="fullName"
                         value={authUser.fullname}
-                        onChange={handleChange}
-                        disabled={!isEditing}
+                        disabled={true}
                         />
                     </div>
-                    {console.log(authUser)}
                     <div>
                         <Label htmlFor="email">Email</Label>
                         <Input

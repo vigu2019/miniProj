@@ -83,8 +83,67 @@ const logout = async (req, res) => {
         console.log(error);
     }
 }
+const updatePassword = async (req,res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ error: "All fields are required" });
+        }
+        const user = await db.query("SELECT * FROM users WHERE id = $1", [
+            req.user.id
+        ]);
+        const validPassword = await bcrypt.compare(oldPassword, user.rows[0].password);
+        if (!validPassword) {
+            return res.status(400).json({ error: "Invalid credentials" });
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        await db.query("UPDATE users SET password = $1 WHERE id = $2", [
+            hashedPassword,
+            req.user.id
+        ]);
+        res.json({ message: "Password updated" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+        console.log(error);
+    }
+}
+
+const updateProfile = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ error: "All fields are required" });
+        }
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({ error: "Invalid email" });
+        }
+        const existingUser = await db.query("SELECT * FROM users WHERE email = $1", [
+            email
+        ]);
+        if (existingUser.rows.length) {
+            return res.status(400).json({ error: "Email already exists" });
+        }
+        const user = await db.query("SELECT * FROM users WHERE id = $1", [
+            req.user.id
+        ]);
+        if (!user.rows.length) {
+            return res.status(400).json({ error: "User does not exist" });
+        }
+        await db.query("UPDATE users SET email = $1 WHERE id = $2", [
+            email,
+            req.user.id
+        ]);
+        res.json({ message: "Profile updated" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+        console.log(error);
+    }
+}
 module.exports = {
     register,
     login,
-    logout
+    logout,
+    updatePassword,
+    updateProfile
 }
