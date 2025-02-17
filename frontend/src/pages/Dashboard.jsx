@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sidebar } from "../components/Dashboard/Sidebar";
 import { PrintDashboard } from "../components/Dashboard/PrintDashboard";
-import { StoreDashboard } from "../components/Dashboard/StoreDashboard";
+import StoreDashboard  from "../components/Dashboard/StoreDashboard";
 import { Navbar } from "../components/Navbar/Navbar";
 
 export default function Dashboard() {
