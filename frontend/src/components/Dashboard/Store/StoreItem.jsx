@@ -1,14 +1,21 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+"use client"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
-export default function StoreItem({ id, name, price, onAddToCart }) {
+export function StoreItem({ id, name, price, category, onAddToCart }) {
   return (
     <Card className="flex flex-col justify-between">
       <CardHeader>
-        <CardTitle className="text-lg">{name}</CardTitle>
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-lg">{name}</CardTitle>
+          <Badge variant="outline" className="capitalize">
+            {category}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent>
-        <p className="text-2xl font-bold">${price.toFixed(2)}</p>
+        <p className="text-2xl font-bold">₹{price.toFixed(2)}</p>
       </CardContent>
       <CardFooter>
         <Button onClick={() => onAddToCart(id)} className="w-full">
@@ -16,5 +23,5 @@ export default function StoreItem({ id, name, price, onAddToCart }) {
         </Button>
       </CardFooter>
     </Card>
-  );
+  )
 }

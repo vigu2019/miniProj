@@ -31,14 +31,14 @@ export default function Cart({ items, onRemoveFromCart, onCheckout }) {
                 <span>
                   {item.name} (x{item.quantity})
                 </span>
-                <span>${(item.price * item.quantity).toFixed(2)}</span>
+                <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                 <Button variant="destructive" size="sm" onClick={() => onRemoveFromCart(item.id)}>
                   Remove
                 </Button>
               </div>
             ))}
           </ScrollArea>
-          <div className="text-xl font-bold">Total: ${total.toFixed(2)}</div>
+          <div className="text-xl font-bold">Total: ₹{total.toFixed(2)}</div>
           <Button onClick={onCheckout} className="w-full">
             Checkout
           </Button>
