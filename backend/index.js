@@ -11,6 +11,7 @@ app.use(cors({
     origin: process.env.CLIENT_URL
 }))
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use('/v1/api/user', userRoutes);
 app.use('/v1/api/user/print', printRoutes);
 

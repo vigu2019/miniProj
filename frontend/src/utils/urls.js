@@ -4,5 +4,6 @@ export const urls = {
     login: `${serverUrl}/v1/api/user/login`,
     logout: `${serverUrl}/v1/api/user/logout`,
     updatePassword: `${serverUrl}/v1/api/user/update-password`,
-    updateProfile: `${serverUrl}/v1/api/user/update-profile`
+    updateProfile: `${serverUrl}/v1/api/user/update-profile`,
+    addPrint: `${serverUrl}/v1/api/user/print/addprint`,
 }
