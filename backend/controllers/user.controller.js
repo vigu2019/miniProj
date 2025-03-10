@@ -65,7 +65,8 @@ const login = async (req, res) => {
                 id: user.rows[0].id,
                 username: user.rows[0].username,
                 email: user.rows[0].email,
-                fullname: user.rows[0].fullname
+                fullname: user.rows[0].fullname,
+                role: user.rows[0].role
             }
         });
     }

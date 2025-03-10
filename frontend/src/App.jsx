@@ -4,15 +4,16 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthContext } from './context/AuthContext';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/AuthPage';
+import  NotFound  from './pages/NotFound';
 function App() {
   const {authUser} = useAuthContext();
-  // console.log("authUser:", authUser);
   return (
     <>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={authUser ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={authUser ? authUser.role ==="user" ? <Navigate to="/user-dashboard" /> : authUser.role === "print"? <Navigate to="/print-dashboard" /> : <Navigate to="/store-dashboard" /> : <Navigate to="/login" />} />
+        <Route path="/user-dashboard" element={<Dashboard />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       
       <ToastContainer />
