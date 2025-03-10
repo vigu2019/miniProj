@@ -52,8 +52,9 @@ const db = require("../utils/db"); // Updated to use PostgreSQL with `pg`
 // };
 const addPrint = async (req, res) => {
   try {
-    const { user_id, copies, printType, printSide, description } = req.body;
+    const { copies, printType, printSide, description } = req.body;
     const file = req.file;
+    const user_id = req.user.id;
     // console.log("file upload", file);
     
     if (!file || !user_id) return res.status(400).json({ error: "Missing file or user_id" });
@@ -81,5 +82,32 @@ const addPrint = async (req, res) => {
     console.log(error);
   }
 };
+// Backend: Get all user prints without any status filtering
+const getUserPrints = async (req, res) => {
+  try {
+    const user_id = req.user.id;
+    
+    const query = `
+      SELECT * FROM prints 
+      WHERE user_id = $1
+      ORDER BY created_at DESC
+    `;
+    
+    const { rows } = await db.query(query, [user_id]);
+    
+    return res.status(200).json({ 
+      message: rows.length ? "User prints retrieved successfully" : "No prints found", 
+      count: rows.length,
+      data: rows 
+    });
+  } 
+  catch (error) {
+    console.log(error);
+    return res.status(500).json({ 
+      error: "Server error", 
+      message: error.message 
+    });
+  }
+};
 
-module.exports = { addPrint };
+module.exports = { addPrint , getUserPrints };

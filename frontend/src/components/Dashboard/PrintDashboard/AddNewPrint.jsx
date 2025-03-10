@@ -30,7 +30,7 @@ export function AddNewPrint() {
     // Create FormData object to send file and other data
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("user_id", authUser.id);
+    // formData.append("user_id", authUser.id);
     formData.append("copies", copies);
     formData.append("printType", printType);
     formData.append("printSide", printSide);
@@ -39,7 +39,13 @@ export function AddNewPrint() {
     setIsSubmitting(true);
     
     try {
-      const response = await axios.post(urls.addPrint, formData)
+      const response = await axios.post(urls.addPrint, formData,{
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+      );
       toast.success(response.data.message);
       
       // Reset form

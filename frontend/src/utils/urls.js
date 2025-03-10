@@ -8,4 +8,5 @@ export const urls = {
     addPrint: `${serverUrl}/v1/api/user/print/addprint`,
     addOrder: `${serverUrl}/v1/api/store/addorder`,
     getOrders: `${serverUrl}/v1/api/store/orders`,
+    getUserPrints: `${serverUrl}/v1/api/user/print/userprints`,
 }
