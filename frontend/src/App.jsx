@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/AuthPage';
 import  NotFound  from './pages/NotFound';
 import PrintStaffDashboard from './pages/PrintStaffDashboard';
+import StorekeeperDashboard from './pages/StorekeeperDashboard';
 function App() {
   const {authUser} = useAuthContext();
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/user-dashboard" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
         <Route path="/print-dashboard" element={<PrintStaffDashboard/>}/>
+        <Route path="/store-dashboard" element={<StorekeeperDashboard/>}/>
       </Routes>
       
       <ToastContainer />
