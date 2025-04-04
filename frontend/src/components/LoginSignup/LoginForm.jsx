@@ -14,7 +14,8 @@ export default function LoginForm() {
     password: "",
   });
   const navigate = useNavigate();
-  const {setAuthUser} = useAuthContext();
+  const { setAuthUser  } = useAuthContext();
+  
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
@@ -23,9 +24,9 @@ export default function LoginForm() {
     e.preventDefault();
     try {
       const response = await axios.post(urls.login, formData);
-      localStorage.setItem("token", response.data.token,{expires: 1});
+      localStorage.setItem("token", response.data.token, { expires: 1 });
       localStorage.setItem("user", JSON.stringify(response.data.user));
-      setAuthUser(response.data.user);
+      setAuthUser (response.data.user);
       toast.success(response.data.message);
       navigate("/");
     } catch (error) {
@@ -35,18 +36,20 @@ export default function LoginForm() {
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
-      <div className="space-y-2">
-        <Label htmlFor="username">Username</Label>
-        <Input id="username" placeholder="Enter your username" value={formData.username} onChange={handleChange} required />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" placeholder="Enter your password" value={formData.password} onChange={handleChange} required />
-      </div>
-      <Button type="submit" className="w-full">
-        Login
-      </Button>
-    </form>
+    <div className="bg-gray-100 p-6 rounded-lg shadow-md"> {/* Add background and styling here */}
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <div className="space-y-2">
+          <Label htmlFor="username">Username</Label>
+          <Input id="username" placeholder="Enter your username" value={formData.username} onChange={handleChange} required />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input id="password" type="password" placeholder="Enter your password" value={formData.password} onChange={handleChange} required />
+        </div>
+        <Button type="submit" className="w-full">
+          Login
+        </Button>
+      </form>
+    </div>
   );
 }
