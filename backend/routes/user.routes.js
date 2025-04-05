@@ -5,7 +5,7 @@ const router=express.Router();
 
 router.post('/register',register);
 router.post('/login',login);
-router.get('/logout',logout);
+router.get('/logout',verifyToken,logout);
 router.put('/update-password',verifyToken,updatePassword);
 router.put('/update-profile',verifyToken,updateProfile);
 

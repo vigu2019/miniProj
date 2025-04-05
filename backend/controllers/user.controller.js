@@ -2,10 +2,11 @@ const db = require("../utils/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const validator = require('validator');
+const {sendEmail} = require('../utils/mailer');
 
 const register = async (req, res) => {
     try {
-        const {username , email, fullname, password} = req.body;
+        const {username, email, fullname, password} = req.body;
         if (!username || !email || !fullname || !password) {
             return res.status(400).json({ error: "All fields are required" });
         }
@@ -32,7 +33,84 @@ const register = async (req, res) => {
         "INSERT INTO users (username, email, fullname, password) VALUES ($1, $2, $3, $4) RETURNING username, id",
         [username, email, fullname, hashedPassword]
         );
-        res.json({ message: `User ${newUser.rows[0].username} registered with id ${newUser.rows[0].id}` });
+
+        // Create HTML email content
+        const emailSubject = "Welcome to CampusEase!";
+        const emailHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    max-width: 600px;
+                    margin: 0 auto;
+                }
+                .container {
+                    padding: 20px;
+                    background-color: #f9f9f9;
+                    border-radius: 8px;
+                }
+                .header {
+                    background-color: #4a90e2;
+                    color: white;
+                    padding: 15px;
+                    text-align: center;
+                    border-radius: 8px 8px 0 0;
+                }
+                .content {
+                    padding: 20px;
+                    background-color: white;
+                    border-radius: 0 0 8px 8px;
+                }
+                .button {
+                    display: inline-block;
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 12px 24px;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    margin-top: 15px;
+                }
+                .footer {
+                    text-align: center;
+                    font-size: 12px;
+                    margin-top: 20px;
+                    color: #666;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Welcome to CampusEase!</h1>
+                </div>
+                <div class="content">
+                    <h2>Hello ${fullname}!</h2>
+                    <p>Thank you for registering with us. We're excited to have you on board!</p>
+                    <p>Your account has been created successfully with the username: <strong>${username}</strong></p>
+                    <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+                    <p>Best regards,<br>The Team</p>
+                </div>
+                <div class="footer">
+                    <p>This email was sent to ${email}. If you did not register for this account, please contact support.</p>
+                    <p>&copy; 2025 CampusEase. All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
+
+        const emailSent = await sendEmail(email, emailSubject, emailHtml);
+        if (!emailSent) {
+            return res.status(500).json({ error: "Failed to send email" });
+        }
+        res.json({ 
+            message: `User ${newUser.rows[0].username} registered with id ${newUser.rows[0].id}`,
+            emailSent: true 
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
         console.log(error);
@@ -77,6 +155,7 @@ const login = async (req, res) => {
 }
 const logout = async (req, res) => {
     try {
+
         res.clearCookie("token");
         res.json({ message: "Logged out" });
     } catch (error) {

@@ -161,7 +161,7 @@ export default function OrdersTable({ searchQuery = "", statusFilter = "all" }) 
       setIsStatusDialogOpen(false)
     } else {
       // Handle error - could show a toast notification here
-      alert("Failed to update order status. Please try again.")
+      toast.error("Failed to update order status")
     }
   }
 

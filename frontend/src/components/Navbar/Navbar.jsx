@@ -99,7 +99,22 @@
     const handleLogout = async (e) => {
         e.preventDefault();
         try{
-            const response = await axios.get(urls.logout);
+            const token = localStorage.getItem("token");
+            // console.log(token)
+            if (!token) {
+                toast.error("You are not logged in");
+                navigate("/login")
+                return;
+            }
+            const response = await axios.get(urls.logout, {
+                headers:{
+                    "Authorization": `Bearer ${token}`
+                }
+            })
+            if (response.status !== 200) {
+                toast.error("Logout failed");
+                return;
+            }
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             setAuthUser(null);
