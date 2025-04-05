@@ -21,8 +21,8 @@ const getAllPrints = async (req, res) => {
     }
 };
 const updateStatus = async (req, res) => {
-    // const { printId, status } = req.body;
-    console.log(printId, status)
+    const { printId, status } = req.body;
+    // console.log(printId, status)
     try {
         const query = `UPDATE prints SET status = $1 WHERE id = $2 RETURNING *`;
         const { rows } = await db.query(query, [status, printId]);
