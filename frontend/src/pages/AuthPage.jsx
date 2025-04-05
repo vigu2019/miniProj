@@ -15,14 +15,10 @@ export default function AuthPage() {
           <CardDescription className="text-center text-gray-600">Login or create an account</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 border-b border-gray-300">
-              <TabsTrigger value="login" className={`py-2 text-lg font-semibold ${activeTab === "login" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-blue-600"}`}>
-                Login
-              </TabsTrigger>
-              <TabsTrigger value="signup" className={`py-2 text-lg font-semibold ${activeTab === "signup" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-blue-600"}`}>
-                Sign Up
-              </TabsTrigger>
+          <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
               <LoginForm />

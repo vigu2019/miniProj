@@ -47,7 +47,7 @@
             const token = localStorage.getItem("token")
             const response = await axios.put(urls.updateProfile, userDetails, {
                 headers: {
-                    "auth-token": token,
+                    "Authorization": `Bearer ${token}`,
                 },
             })
             toast.success(response.data.message)

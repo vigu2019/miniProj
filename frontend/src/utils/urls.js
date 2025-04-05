@@ -9,4 +9,8 @@ export const urls = {
     addOrder: `${serverUrl}/v1/api/store/addorder`,
     getOrders: `${serverUrl}/v1/api/store/orders`,
     getUserPrints: `${serverUrl}/v1/api/user/print/userprints`,
+    getUserOrders:`${serverUrl}/v1/api/store-staff/orders`,
+    updateOrderStatus:`${serverUrl}/v1/api/store-staff/orders/status`,
+    getAllPrints:`${serverUrl}/v1/api/print-staff/prints`,
+    updatePrintStatus:`${serverUrl}/v1/api/print-staff/prints`,
 }

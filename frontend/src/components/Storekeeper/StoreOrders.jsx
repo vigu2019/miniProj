@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import axios from "axios"
 import {
   Dialog,
   DialogContent,
@@ -16,19 +17,18 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { ChevronDown, Eye } from "lucide-react"
+import { ChevronDown, Eye, Loader2 } from "lucide-react"
+import { urls } from "@/utils/urls"
+import { toast } from "react-toastify"
 
 // Status badge colors mapping
 const STATUS_COLORS = {
   pending: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
-  processing: "bg-blue-100 text-blue-800 hover:bg-blue-200",
-  shipped: "bg-purple-100 text-purple-800 hover:bg-purple-200",
-  delivered: "bg-green-100 text-green-800 hover:bg-green-200",
-  cancelled: "bg-red-100 text-red-800 hover:bg-red-200",
+  completed: "bg-green-100 text-green-800 hover:bg-green-200",
 }
 
-// Mock data moved outside component to prevent recreation on each render
-const INITIAL_ORDERS = [
+// Fallback mock data for development purposes
+const FALLBACK_ORDERS = [
   {
     id: "ORD-001",
     date: new Date("2023-03-15"),
@@ -40,101 +40,101 @@ const INITIAL_ORDERS = [
     total: 129.97,
     status: "pending",
   },
-  {
-    id: "ORD-002",
-    date: new Date("2023-03-14"),
-    customer: "Sarah Johnson",
-    items: [{ name: "Smart Watch", quantity: 1, price: 199.99 }],
-    total: 199.99,
-    status: "processing",
-  },
-  {
-    id: "ORD-003",
-    date: new Date("2023-03-13"),
-    customer: "Michael Brown",
-    items: [
-      { name: "Bluetooth Speaker", quantity: 1, price: 79.99 },
-      { name: "USB Cable", quantity: 3, price: 9.99 },
-    ],
-    total: 109.96,
-    status: "shipped",
-  },
-  {
-    id: "ORD-004",
-    date: new Date("2023-03-12"),
-    customer: "Emily Davis",
-    items: [
-      { name: "Laptop Sleeve", quantity: 1, price: 29.99 },
-      { name: "Wireless Mouse", quantity: 1, price: 24.99 },
-      { name: "HDMI Cable", quantity: 1, price: 14.99 },
-    ],
-    total: 69.97,
-    status: "delivered",
-  },
-  {
-    id: "ORD-005",
-    date: new Date("2023-03-11"),
-    customer: "David Wilson",
-    items: [{ name: "External Hard Drive", quantity: 1, price: 119.99 }],
-    total: 119.99,
-    status: "cancelled",
-  },
-  {
-    id: "ORD-006",
-    date: new Date("2023-03-10"),
-    customer: "Jessica Martinez",
-    items: [
-      { name: "Wireless Keyboard", quantity: 1, price: 59.99 },
-      { name: "Monitor Stand", quantity: 1, price: 34.99 },
-    ],
-    total: 94.98,
-    status: "pending",
-  },
-  {
-    id: "ORD-007",
-    date: new Date("2023-03-09"),
-    customer: "Robert Taylor",
-    items: [
-      { name: "Webcam", quantity: 1, price: 49.99 },
-      { name: "Microphone", quantity: 1, price: 39.99 },
-    ],
-    total: 89.98,
-    status: "processing",
-  },
-  {
-    id: "ORD-008",
-    date: new Date("2023-03-08"),
-    customer: "Jennifer Anderson",
-    items: [
-      { name: "Tablet", quantity: 1, price: 299.99 },
-      { name: "Screen Protector", quantity: 1, price: 14.99 },
-    ],
-    total: 314.98,
-    status: "shipped",
-  },
+  // ... other mock orders
 ]
 
 export default function OrdersTable({ searchQuery = "", statusFilter = "all" }) {
-  const [orders, setOrders] = useState(INITIAL_ORDERS)
+  const [orders, setOrders] = useState([])
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
   const [newStatus, setNewStatus] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  // Fetch orders data
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true)
+        const token = localStorage.getItem("token")
+        const response = await axios.get(urls.getUserOrders, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        }
+        )
+        console.log("Response data:", response) // Debugging line
+        
+        if (!response.data.success) {
+          throw new Error('Failed to fetch orders')
+        }
+        
+        // Convert string dates to Date objects
+        const ordersWithDates = response.data.items.map(order => ({
+          ...order,
+          date: new Date(order.date)
+        }))
+        
+        setOrders(ordersWithDates)
+        setError(null)
+      } catch (err) {
+        console.error('Error fetching orders:', err)
+        setError('Failed to load orders. Please try again later.')
+        // Use fallback data in development
+        if (process.env.NODE_ENV === 'development') {
+          setOrders(FALLBACK_ORDERS)
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchOrders()
+  }, [])
+
+  // Update order status
+  const updateOrderStatus = async (orderId, status) => {
+    try {
+      const token = localStorage.getItem("token")
+      //pass orderId and status to the API anad add headers
+      const response = await axios.put(urls.updateOrderStatus, {
+        orderId,
+        status,
+      }, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      })
+      if(!response.data.success) {
+        throw new Error('Failed to update order status')
+      }
+      // Update local state after successful API call
+      setOrders(orders.map((order) => 
+        order.id === orderId ? { ...order, status } : order
+      ))
+      toast.success(`Order status updated to ${status}`)
+      return true
+    } catch (err) {
+      console.error('Error updating order status:', err)
+      return false
+    }
+  }
 
   // Use memoization to avoid recalculating filtered orders on every render
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       // Apply search filter
       const matchesSearch = searchQuery
-        ? order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ? order.id.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
           order.customer.toLowerCase().includes(searchQuery.toLowerCase())
         : true
 
       // Apply status filter
       const matchesStatus = 
         statusFilter === "all" ? true :
-        statusFilter === "pending" ? ["pending", "processing"].includes(order.status) :
-        statusFilter === "completed" ? ["shipped", "delivered"].includes(order.status) :
+        statusFilter === "pending" ? ["pending"].includes(order.status) :
+        statusFilter === "completed" ? ["completed"].includes(order.status) :
         order.status === statusFilter
 
       return matchesSearch && matchesStatus
@@ -152,13 +152,17 @@ export default function OrdersTable({ searchQuery = "", statusFilter = "all" }) 
   }
 
   // Handler functions
-  const handleStatusChange = () => {
+  const handleStatusChange = async () => {
     if (!selectedOrder || !newStatus) return
 
-    setOrders(orders.map((order) => 
-      order.id === selectedOrder.id ? { ...order, status: newStatus } : order
-    ))
-    setIsStatusDialogOpen(false)
+    const success = await updateOrderStatus(selectedOrder.id, newStatus)
+    
+    if (success) {
+      setIsStatusDialogOpen(false)
+    } else {
+      // Handle error - could show a toast notification here
+      alert("Failed to update order status. Please try again.")
+    }
   }
 
   const openStatusDialog = (order) => {
@@ -174,9 +178,30 @@ export default function OrdersTable({ searchQuery = "", statusFilter = "all" }) 
 
   // Extract order item summary for table display
   const getOrderSummary = (items) => {
+    if (!items || items.length === 0) return "No items"
     return items.length === 1
       ? items[0].name
       : `${items[0].name} + ${items.length - 1} more`
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <span className="ml-2 text-muted-foreground">Loading orders...</span>
+      </div>
+    )
+  }
+
+  if (error && orders.length === 0) {
+    return (
+      <div className="text-center py-10 border rounded-md">
+        <p className="text-red-500">{error}</p>
+        <Button className="mt-4" onClick={() => window.location.reload()}>
+          Try Again
+        </Button>
+      </div>
+    )
   }
 
   return (
@@ -328,10 +353,11 @@ export default function OrdersTable({ searchQuery = "", statusFilter = "all" }) 
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="processing">Processing</SelectItem>
+                {/* <SelectItem value="processing">Processing</SelectItem>
                 <SelectItem value="shipped">Shipped</SelectItem>
-                <SelectItem value="delivered">Delivered</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem> */}
+                <SelectItem value="completed">Completed</SelectItem>
+                {/* <SelectItem value="cancelled">Cancelled</SelectItem> */}
               </SelectContent>
             </Select>
           </div>
