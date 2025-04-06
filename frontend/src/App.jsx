@@ -7,6 +7,7 @@ import Login from './pages/AuthPage';
 import  NotFound  from './pages/NotFound';
 import PrintStaffDashboard from './pages/PrintStaffDashboard';
 import StorekeeperDashboard from './pages/StorekeeperDashboard';
+import PaymentSuccess from './pages/PaymentSuccess';
 function App() {
   const {authUser} = useAuthContext();
   return (
@@ -18,8 +19,8 @@ function App() {
         <Route path="*" element={<NotFound />} />
         <Route path="/print-dashboard" element={<PrintStaffDashboard/>}/>
         <Route path="/store-dashboard" element={<StorekeeperDashboard/>}/>
+        <Route path="/payment-success" element={<PaymentSuccess />} />
       </Routes>
-      
       <ToastContainer />
     </>
   )

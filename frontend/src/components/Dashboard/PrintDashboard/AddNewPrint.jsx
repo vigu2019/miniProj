@@ -37,6 +37,8 @@ export function AddNewPrint() {
     formData.append("description", description);
     
     setIsSubmitting(true);
+    const total = printType === "color" ? copies * 10 : copies * 1;
+    formData.append("total", total);
     
     try {
       const response = await axios.post(urls.addPrint, formData,{
@@ -46,18 +48,44 @@ export function AddNewPrint() {
         },
       }
       );
-      toast.success(response.data.message);
-      
-      // Reset form
-      setFile(null);
-      setCopies(1);
-      setPrintType("black-and-white");
-      setPrintSide("single");
-      setDescription("");
-      
-      // Reset file input by getting the element and resetting its value
-      const fileInput = document.getElementById("file-upload");
-      if (fileInput) fileInput.value = "";
+
+      const order = response.data.order
+      const key = response.data.key
+      const options = {
+        key: key,
+        amount: order.amount,
+        currency: "INR",
+        name: "CampusEase",
+        description: "Campus Print Order",
+        image: "https://avatars.githubusercontent.com/u/25058652?v=4",
+        order_id: order.id,
+        callback_url: urls.paymentVerificationPrint,
+        prefill: {
+            name: authUser.fullname,
+            email: authUser.email,
+        },
+        notes: {
+            "address": "CampusEase"
+        },
+        theme: {
+            "color": "#121212"
+        }
+    };
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+      razorpay.on("payment.failed", function (response) {
+        toast.error("Payment failed. Please try again.");
+      });
+      razorpay.on("payment.success", function (response) {
+        toast.success("Payment successful. Your print request has been submitted.");
+        setFile(null);
+        setCopies(1);
+        setPrintType("black-and-white");
+        setPrintSide("single");
+        setDescription("");
+        const fileInput = document.getElementById("file-upload");
+        if (fileInput) fileInput.value = "";
+      });
       
     } catch (error) {
       console.log(error);

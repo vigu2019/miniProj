@@ -64,14 +64,13 @@ export default function OrdersTable({ searchQuery = "", statusFilter = "all" }) 
           },
         }
         )
-        console.log("Response data:", response) // Debugging line
+        // console.log("Response data:", response) // Debugging line
         
         if (!response.data.success) {
           throw new Error('Failed to fetch orders')
         }
-        
-        // Convert string dates to Date objects
-        const ordersWithDates = response.data.items.map(order => ({
+        const orders = response.data.items.filter(order => order.paymentStatus === "paid")
+        const ordersWithDates = orders.map(order => ({
           ...order,
           date: new Date(order.date)
         }))
@@ -233,7 +232,7 @@ export default function OrdersTable({ searchQuery = "", statusFilter = "all" }) 
                   <TableCell>{order.date.toLocaleDateString()}</TableCell>
                   <TableCell>{order.customer}</TableCell>
                   <TableCell>{getOrderSummary(order.items)}</TableCell>
-                  <TableCell>${order.total.toFixed(2)}</TableCell>
+                  <TableCell>₹{order.total.toFixed(2)}</TableCell>
                   <TableCell>
                     <Button 
                       variant="ghost" 
@@ -323,13 +322,13 @@ export default function OrdersTable({ searchQuery = "", statusFilter = "all" }) 
                           <span className="font-medium">{item.name}</span>
                           <span className="text-muted-foreground ml-2">x{item.quantity}</span>
                         </div>
-                        <span>${(item.price * item.quantity).toFixed(2)}</span>
+                        <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                       </div>
                     ))}
                     <Separator className="my-2" />
                     <div className="flex justify-between font-medium">
                       <span>Total</span>
-                      <span>${selectedOrder.total.toFixed(2)}</span>
+                      <span>₹{selectedOrder.total.toFixed(2)}</span>
                     </div>
                   </div>
                 </CardContent>

@@ -5,7 +5,7 @@ const getAllOrders = async (req, res) => {
     try {
         // Modified query to get all orders without filtering by user_id
         const ordersQuery = `
-            SELECT o.id, o.order_date, o.status, o.total, o.created_at, u.fullname as customer_name, o.user_id
+            SELECT o.id, o.order_date, o.status, o.total, o.created_at, u.fullname as customer_name, o.user_id,o.payment_status
             FROM orders o
             JOIN users u ON o.user_id = u.id
             ORDER BY o.order_date DESC
@@ -44,7 +44,9 @@ const getAllOrders = async (req, res) => {
             userId: order.user_id,
             items: itemsByOrderId[order.id] || [],
             total: parseFloat(order.total),
-            status: order.status.toLowerCase()
+            status: order.status.toLowerCase(),
+            paymentStatus: order.payment_status.toLowerCase(),
+
         }));
 
         return res.status(200).json({ items: ordersWithItems,success: true });
@@ -66,7 +68,7 @@ const updateStatus = async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).json({ message: 'Order not found', success: false });
         }
-        console.log('Order status updated:', rows[0]);
+        // console.log('Order status updated:', rows[0]);
         
         // Only send email notification if the status is "completed"
         if (status.toLowerCase() === 'completed') {

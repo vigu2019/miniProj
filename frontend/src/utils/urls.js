@@ -13,4 +13,6 @@ export const urls = {
     updateOrderStatus:`${serverUrl}/v1/api/store-staff/orders/status`,
     getAllPrints:`${serverUrl}/v1/api/print-staff/prints`,
     updatePrintStatus:`${serverUrl}/v1/api/print-staff/prints`,
+    paymentVerification:`${serverUrl}/v1/api/store/payment/verify`,
+    paymentVerificationPrint:`${serverUrl}/v1/api/print/payment/verify`,
 }

@@ -1,10 +1,9 @@
-const multer = require("multer");
 const cloudinary = require("../utils/cloudinary");
 const db = require("../utils/db"); // Updated to use PostgreSQL with `pg`
-const {sendEmail} = require("../utils/mailer");
+const instance = require("../utils/razorpay"); // Razorpay instance for payment processing
 const addPrint = async (req, res) => {
   try {
-    const { copies, printType, printSide, description } = req.body;
+    const { copies, printType, printSide, description ,total } = req.body;
     const file = req.file;
     const user_id = req.user.id;
     // console.log("file upload", file);
@@ -22,165 +21,24 @@ const addPrint = async (req, res) => {
       format: file.mimetype.split('/')[1] // Extract the file extension
     });
     
-    const query = `INSERT INTO prints (user_id, file_url, copies, print_type, print_side, description) 
-                  VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
-    const values = [user_id, result.secure_url, copies, printType, printSide, description];
+    const query = `INSERT INTO prints (user_id, file_url, copies, print_type, print_side, description ,total) 
+                  VALUES ($1, $2, $3, $4, $5, $6,$7) RETURNING *`;
+    const values = [user_id, result.secure_url, copies, printType, printSide, description,total];
     
     const { rows } = await db.query(query, values);
-    
-    //send email notification to the user
-    const userQuery = `SELECT email FROM users WHERE id = $1`;
-    const { rows: userRows } = await db.query(userQuery, [user_id]);
-    if (userRows.length === 0) {
-      return res.status(404).json({ message: "User not found" });
+    const printId = rows[0].id;
+    const options = {
+        amount: total * 100, // Amount in paise
+        currency: "INR",
+        receipt: printId.toString(),
     }
-    
-    const userEmail = userRows[0].email;
-    const subject = "Print Request Confirmation";
-    
-    // Create HTML email content
-    const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                line-height: 1.6;
-                color: #333;
-                max-width: 600px;
-                margin: 0 auto;
-            }
-            .container {
-                padding: 20px;
-                border: 1px solid #ddd;
-                border-radius: 5px;
-            }
-            .header {
-                background-color: #f8f9fa;
-                padding: 15px;
-                text-align: center;
-                border-bottom: 1px solid #ddd;
-            }
-            .content {
-                padding: 20px 0;
-            }
-            .print-details {
-                margin: 20px 0;
-                background-color: #f9f9f9;
-                padding: 15px;
-                border-radius: 5px;
-            }
-            .detail-row {
-                display: flex;
-                margin-bottom: 10px;
-            }
-            .detail-label {
-                font-weight: bold;
-                width: 140px;
-            }
-            .status {
-                display: inline-block;
-                padding: 5px 10px;
-                background-color: #ffc107;
-                color: #000;
-                border-radius: 3px;
-                font-weight: bold;
-            }
-            .footer {
-                margin-top: 30px;
-                text-align: center;
-                font-size: 0.9em;
-                color: #777;
-            }
-            .file-preview {
-                width: 100%;
-                max-height: 150px;
-                background-color: #f0f0f0;
-                border: 1px dashed #ccc;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin: 15px 0;
-                padding: 15px 0;
-            }
-            .file-icon {
-                font-size: 48px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h2>Print Request Confirmation</h2>
-            </div>
-            <div class="content">
-                <p>Hello,</p>
-                <p>Thank you for your print request! We're pleased to confirm that your request has been received and is being processed.</p>
-                
-                <div class="print-details">
-                    <h3>Print Request Details</h3>
-                    
-                    <div class="detail-row">
-                        <div class="detail-label">Request ID:</div>
-                        <div>#${rows[0].id}</div>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <div class="detail-label">Date Submitted:</div>
-                        <div>${new Date(rows[0].created_at).toLocaleDateString()}</div>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <div class="detail-label">Status:</div>
-                        <div><span class="status">Pending</span></div>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <div class="detail-label">Number of Copies:</div>
-                        <div>${copies}</div>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <div class="detail-label">Print Type:</div>
-                        <div>${printType}</div>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <div class="detail-label">Print Side:</div>
-                        <div>${printSide}</div>
-                    </div>
-                    
-                    ${description ? `
-                    <div class="detail-row">
-                        <div class="detail-label">Description:</div>
-                        <div>${description}</div>
-                    </div>
-                    ` : ''}
-                    
-                    <div class="file-preview">
-                        <div class="file-icon">📄</div>
-                    </div>
-                    
-                    <p>Your file has been uploaded successfully.</p>
-                </div>
-                
-                <p>We will process your print request as soon as possible. You will receive another notification when your prints are ready for pickup.</p>
-            </div>
-            <div class="footer">
-                <p>If you have any questions about your print request, please contact our customer service.</p>
-                <p>&copy; ${new Date().getFullYear()} CampusEase</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    `;
-    
-    const emailSent = await sendEmail(userEmail, subject, htmlContent);
-    if (!emailSent) {
-      return res.status(500).json({ message: "Failed to send email notification" });
+    const razorpayOrder = await instance.orders.create(options);
+    if (!razorpayOrder) {
+        return res.status(500).json({ message: "Failed to create Razorpay order", success: false });
     }
-    return res.status(201).json({ message: "Print order added", data: rows[0] });
+    const updateOrderQuery = `UPDATE prints SET rp_id = $1 WHERE id = $2`;
+    await db.query(updateOrderQuery, [razorpayOrder.id, printId]);
+    return res.status(201).json({order: razorpayOrder ,success: true,key: process.env.RAZORPAY_KEY_ID});
   }
   catch (error) {
     res.status(500).json({ error: "Server error", message: error.message });

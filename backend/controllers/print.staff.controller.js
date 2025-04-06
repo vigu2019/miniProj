@@ -3,7 +3,7 @@ const { sendEmail } = require('../utils/mailer');
 const getAllPrints = async (req, res) => {
     try {
         const query = `
-            SELECT p.id, p.file_url, p.copies, p.print_type, p.print_side, p.description, 
+            SELECT p.id, p.file_url, p.copies, p.print_type, p.print_side, p.description, p.payment_status,
                    p.created_at, p.status, u.fullname as user_name
             FROM prints p
             JOIN users u ON p.user_id = u.id

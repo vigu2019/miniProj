@@ -27,9 +27,9 @@ export function PendingPrints() {
 
     fetchUserPrints();
   }, []);
-
+  //
   // Filter pending prints based on the status column
-  const pendingPrints = allPrints.filter(print => print.status === 'pending');
+  const pendingPrints = allPrints.filter(print => print.status === 'pending' && print.payment_status === 'paid');
 
   // Function to handle file viewing
   const handleViewFile = (fileUrl, printId) => {
@@ -72,6 +72,7 @@ export function PendingPrints() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Print ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Copies</th>
@@ -82,6 +83,7 @@ export function PendingPrints() {
             <tbody className="bg-white divide-y divide-gray-200">
               {pendingPrints.map((print) => (
                 <tr key={print.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{print.id}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{print.description || 'No description'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{print.print_type}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{print.copies}</td>
@@ -94,12 +96,6 @@ export function PendingPrints() {
                       className="text-indigo-600 hover:text-indigo-900 mr-4"
                     >
                       View File
-                    </button>
-                    <button 
-                      className="text-red-600 hover:text-red-900"
-                      onClick={() => console.log('Cancel print:', print.id)}
-                    >
-                      Cancel
                     </button>
                   </td>
                 </tr>

@@ -71,9 +71,11 @@ export function PrintShopkeeperDashboard() {
           printSide: job.print_side,
           description: job.description,
           status: job.status,
-          submittedAt: job.created_at
+          submittedAt: job.created_at,
+          payment_status: job.payment_status,
         }))
-        setPrintJobs(formattedJobs)
+        const paidJobs = formattedJobs.filter(job => job.payment_status === "paid")
+        setPrintJobs(paidJobs)
       } else {
         toast.error("Failed to fetch print jobs")
       }
