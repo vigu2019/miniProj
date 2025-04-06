@@ -9,9 +9,11 @@ const printStaffRoutes = require("./routes/print.staff.routes");
 const paymentRoutes = require('./routes/payment.routes');
 const paymentPrintRoutes = require('./routes/payment.print.routes');
 const morgan = require('morgan');
+const path = require('path');
 const { transporter } = require('./utils/mailer');  
 
 require('dotenv').config();
+const ___dirname = path.resolve();
 
 app.use(morgan('dev'));
 app.use(cors({
@@ -30,7 +32,10 @@ app.use('/v1/api/print-staff', printStaffRoutes);
 app.use('/v1/api/store/payment', paymentRoutes);
 app.use('/v1/api/print/payment', paymentPrintRoutes);
 
-
+app.use(express.static(path.join(___dirname, '/frontend/dist')));
+app.get('*', (req,res) => {
+        res.sendFile(path.resolve(___dirname, "frontend", "dist", "index.html"));
+});
 // Start server
 server.listen(process.env.PORT, () => {
     console.log(`Server is listening on port ${process.env.PORT}`);
