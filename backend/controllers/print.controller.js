@@ -3,7 +3,7 @@ const db = require("../utils/db"); // Updated to use PostgreSQL with `pg`
 const instance = require("../utils/razorpay"); // Razorpay instance for payment processing
 const addPrint = async (req, res) => {
   try {
-    const { copies, printType, printSide, description ,total } = req.body;
+    const { copies, printType, printSide, description } = req.body;
     const file = req.file;
     const user_id = req.user.id;
     // console.log("file upload", file);
@@ -20,11 +20,14 @@ const addPrint = async (req, res) => {
       public_id: `${user_id}_${Date.now()}`,
       format: file.mimetype.split('/')[1] // Extract the file extension
     });
-    
+    const numPages = result.pages || 1; // Default to 1 page if not provided
+
+    const printCost = printType === "color" ? 10 : 1; // Cost per page based on type
+    const total = numPages * printCost * copies; 
+    console.log(numPages, total, printCost, copies, printType);
     const query = `INSERT INTO prints (user_id, file_url, copies, print_type, print_side, description ,total) 
                   VALUES ($1, $2, $3, $4, $5, $6,$7) RETURNING *`;
     const values = [user_id, result.secure_url, copies, printType, printSide, description,total];
-    
     const { rows } = await db.query(query, values);
     const printId = rows[0].id;
     const options = {

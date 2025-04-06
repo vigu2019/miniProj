@@ -30,6 +30,7 @@ app.use('/v1/api/print-staff', printStaffRoutes);
 app.use('/v1/api/store/payment', paymentRoutes);
 app.use('/v1/api/print/payment', paymentPrintRoutes);
 
+
 // Start server
 server.listen(process.env.PORT, () => {
     console.log(`Server is listening on port ${process.env.PORT}`);

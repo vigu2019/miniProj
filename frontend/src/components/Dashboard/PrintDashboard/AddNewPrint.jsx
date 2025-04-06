@@ -37,8 +37,8 @@ export function AddNewPrint() {
     formData.append("description", description);
     
     setIsSubmitting(true);
-    const total = printType === "color" ? copies * 10 : copies * 1;
-    formData.append("total", total);
+    // const total = printType === "color" ? copies * 10 : copies * 1;
+    // formData.append("total", total);
     
     try {
       const response = await axios.post(urls.addPrint, formData,{
