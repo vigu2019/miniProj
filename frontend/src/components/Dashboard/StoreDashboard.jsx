@@ -272,7 +272,7 @@ export default function StoreDashboard() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="capitalize text-sm">{order.status}</span>
-                      <span className="font-semibold">${Number(order.total).toFixed(2)}</span>
+                      <span className="font-semibold">₹{Number(order.total).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-sm text-gray-500">Payment Status: {order.payment_status}</span>
@@ -306,9 +306,9 @@ export default function StoreDashboard() {
                                     <TableCell>{item.name}</TableCell>
                                     <TableCell className="capitalize">{item.category}</TableCell>
                                     <TableCell className="text-center">{item.quantity}</TableCell>
-                                    <TableCell className="text-right">${Number(item.price).toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">₹{Number(item.price).toFixed(2)}</TableCell>
                                     <TableCell className="text-right">
-                                      ${(Number(item.price) * item.quantity).toFixed(2)}
+                                    ₹{(Number(item.price) * item.quantity).toFixed(2)}
                                     </TableCell>
                                   </TableRow>
                                 ))}
@@ -316,7 +316,7 @@ export default function StoreDashboard() {
                                   <TableCell colSpan={4} className="text-right font-bold">
                                     Total:
                                   </TableCell>
-                                  <TableCell className="text-right font-bold">${Number(order.total).toFixed(2)}</TableCell>
+                                  <TableCell className="text-right font-bold">₹{Number(order.total).toFixed(2)}</TableCell>
                                 </TableRow>
                               </TableBody>
                             </Table>
